@@ -1,43 +1,28 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div id="app">
+    <router-view/>
   </div>
-  <router-view/>
 </template>
 
 <script>
-import { defineComponent, getCurrentInstance } from 'vue';
-
-export default defineComponent({
-  setup() {
-    const { proxy } = getCurrentInstance();
-    proxy.$message({
-      message: 'This is a message.',
-    });
-  },
-});
+export default {
+  name: 'App',
+};
 </script>
 
-<style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<style>
+@import url("./assets/font/font.css");
+
+* {
+  margin: 0;
+  padding: 0;
 }
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+body {
+  line-height: 1.5;
+  color: #555555;
+}
+#app {
+  min-height: 100vh;
+  background-color: #ffffff;
 }
 </style>
