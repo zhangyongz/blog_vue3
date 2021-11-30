@@ -6,6 +6,19 @@
   <router-view/>
 </template>
 
+<script>
+import { defineComponent, getCurrentInstance } from 'vue';
+
+export default defineComponent({
+  setup() {
+    const { proxy } = getCurrentInstance();
+    proxy.$message({
+      message: 'This is a message.',
+    });
+  },
+});
+</script>
+
 <style lang="less">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
