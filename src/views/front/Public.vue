@@ -4,7 +4,7 @@
       <div class="wrapper">
         <header class="header">
           <div class="container">
-            <router-link to="/" tag="h1" class="name">章勇的博客</router-link>
+            <!-- <router-link to="/" tag="h1" class="name">章勇的博客</router-link> -->
             <nav class="nav">
               <router-link to="/" class="item" replace>
                 <i class="iconfont icon-home"></i>
@@ -61,15 +61,15 @@
         <p class="name">zhangyong</p>
         <div class="site">
           <router-link to="/Archives" class="item">
-            <p class="count">{{count.article}}</p>
+            <p class="count">{{countInfo.article}}</p>
             <p class="site_name">日志</p>
           </router-link>
           <router-link to="/CategoryArticle" class="item">
-            <p class="count">{{count.category}}</p>
+            <p class="count">{{countInfo.category}}</p>
             <p class="site_name">分类</p>
           </router-link>
           <router-link to="/TagArticle" class="item">
-            <p class="count">{{count.tag}}</p>
+            <p class="count">{{countInfo.tag}}</p>
             <p class="site_name">标签</p>
           </router-link>
         </div>
@@ -78,55 +78,66 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import {
+  defineComponent, ref, onUnmounted, reactive,
+} from 'vue';
+import { getCount } from '@/commons/api';
+
+export default defineComponent({
   name: 'Public',
-  data() {
-    return {
-      showGoTop: false,
-      timer: {},
-      sliderShow: false,
-      count: {},
-    };
-  },
-  created() {
-    this.getCount();
-    window.addEventListener('scroll', this.scrollHandle);
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.scrollHandle);
-  },
-  methods: {
-    /** 数量 */
-    getCount() {
-      this.$api.getCount().then((res) => {
-        console.log(res);
-        if (res.data.reCode === 200) {
-          this.count = res.data.result;
-        }
-      });
-    },
-    scrollHandle() {
+  setup() {
+    const showGoTop = ref(false);
+    function scrollHandle() {
       if (window.scrollY > 50) {
-        this.showGoTop = true;
+        showGoTop.value = true;
       } else {
-        this.showGoTop = false;
+        showGoTop.value = false;
       }
-    },
-    goTopAction() {
-      this.timer = null;
-      this.timer = setTimeout(() => {
+    }
+    window.addEventListener('scroll', scrollHandle);
+    onUnmounted(() => {
+      window.removeEventListener('scroll', scrollHandle);
+    });
+
+    const timer = ref<number | undefined>(undefined);
+    function goTopAction() {
+      timer.value = undefined;
+      timer.value = setTimeout(() => {
         const oTop = document.body.scrollTop || document.documentElement.scrollTop;
         if (oTop > 0) {
           window.scrollTo(0, oTop - 50);
-          this.goTopAction();
+          goTopAction();
         } else {
-          clearTimeout(this.timer);
+          clearTimeout(timer.value);
         }
       }, 10);
-    },
+    }
+
+    let countInfo = reactive({
+      article: 0,
+      category: 0,
+      tag: 0,
+    });
+    function getCountHandle() {
+      getCount().then((res) => {
+        if (res.data.reCode === 200) {
+          countInfo = res.data.result;
+        }
+      });
+    }
+    getCountHandle();
+
+    const sliderShow = ref(false);
+
+    return {
+      showGoTop,
+      sliderShow,
+      countInfo,
+      goTopAction,
+    };
   },
-};
+});
 </script>
 
 <style lang="less">

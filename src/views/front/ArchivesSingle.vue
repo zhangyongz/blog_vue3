@@ -7,72 +7,73 @@
           <small v-if="to==='tag'">标签</small>
         </h2>
       </div>
-      <div class="article" v-for="(article, articleIndex) in info.list" :key="articleIndex" @click="goDetail(article.id)">
+      <div class="article" v-for="(article, articleIndex) in info.list" :key="articleIndex"
+        @click="goDetail(article.id)">
         <span class="date">{{getMothAndDay(article.created_at)}}</span>
         <h3>{{article.title}}</h3>
       </div>
-      <!-- <router-link :to="'/ArticleDetail/' + article.id" class="article" v-for="(article, articleIndex) in info.list"
-      :key="articleIndex">
-        <span class="date">{{getMothAndDay(article.created_at)}}</span>
-        <h3>{{article.title}}</h3>
-      </router-link> -->
     </div>
   </div>
 </template>
 
-<script>
-import { INDEX_URL } from '@/assets/js/consts'
-export default {
-  name: 'ArchivesSingle',
-  data () {
-    return {
-      to: this.$route.query.to,
-      info: {}
+<script setup lang="ts">
+import { useRoute } from 'vue-router';
+import { reactive } from 'vue';
+import { getArticleListByCategory, getArticleListByTag } from '@/commons/api';
+
+interface articleItem {
+  id: number,
+  created_at: string,
+  title: string
+}
+
+interface infoInterface {
+  name: string,
+  list: articleItem[],
+}
+
+const route = useRoute();
+const info: infoInterface = reactive({
+  name: '',
+  list: [],
+});
+const { to } = route.query;
+
+function articleListByCategoryHandle() {
+  getArticleListByCategory({
+    categoryId: route.query.id,
+  }).then((res) => {
+    console.log(res);
+    if (res.data.reCode === 200) {
+      Object.assign(info, res.data.result);
     }
-  },
-  created () {
-    if (this.$route.query.to === 'category') {
-      this.articleListByCategory()
-    } else {
-      this.articleListByTag()
+  });
+}
+
+function articleListByTagHandle() {
+  getArticleListByTag({
+    tagId: route.query.id,
+  }).then((res) => {
+    console.log(res);
+    if (res.data.reCode === 200) {
+      Object.assign(info, res.data.result);
     }
-  },
-  methods: {
-    goDetail (id) {
-      window.open(INDEX_URL + '#/ArticleDetail/' + id)
-    },
-    /** 分类文章 */
-    articleListByCategory () {
-      this.$http.get('v1/front/articleListByCategory', {
-        params: {
-          categoryId: this.$route.params.id
-        }
-      }).then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.info = res.data.result
-        }
-      })
-    },
-    /** 标签文章 */
-    articleListByTag () {
-      this.$http.get('v1/front/articleListByTag', {
-        params: {
-          tagId: this.$route.params.id
-        }
-      }).then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.info = res.data.result
-        }
-      })
-    },
-    /** 发布时间转年月 */
-    getMothAndDay (date) {
-      let mothAndDate = date.split('-')[1] + '-' + date.split('-')[2]
-      return mothAndDate
-    }
-  }
+  });
+}
+
+if (to === 'category') {
+  articleListByCategoryHandle();
+} else {
+  articleListByTagHandle();
+}
+
+function goDetail(id: number) {
+  window.open(`${window.location.origin}/ArticleDetail?id=${id}`);
+}
+
+function getMothAndDay(date: string) {
+  const mothAndDate = `${date.split('-')[1]}-${date.split('-')[2]}`;
+  return mothAndDate;
 }
 </script>
 

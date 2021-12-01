@@ -7,7 +7,8 @@
       </blockquote>
       <div v-html="info.render" class="markdown-body"></div>
       <div class="tags" v-if="info.tag_name">
-        <router-link :to="tagUrl(index)" v-for="(item, index) in info.tag_name" :key="(index)"># {{item}}</router-link>
+        <router-link :to="tagUrl(index)" v-for="(item, index) in info.tag_name"
+        :key="(index)"># {{item}}</router-link>
       </div>
     </div>
     <!-- arduino-light -->
@@ -15,58 +16,57 @@
     <!-- dark -->
     <!-- default -->
     <!-- github-gist -->
-    <mavon-editor codeStyle="github-gist" style="display: none"></mavon-editor>
+    <!-- <mavon-editor codeStyle="github-gist" style="display: none"></mavon-editor> -->
   </div>
 </template>
 
-<script>
-import { mavonEditor } from 'mavon-editor'
-import 'mavon-editor/dist/css/index.css'
-// import '@/assets/css/markdown.css'
-export default {
-  name: 'ArticleDetail',
-  data () {
-    return {
-      info: {}
+<script setup lang="ts">
+// import mavonEditor from 'mavon-editor';
+// import 'mavon-editor/dist/css/index.css';
+import { reactive } from 'vue';
+import { ElLoading } from 'element-plus';
+import { useRoute } from 'vue-router';
+import { getArticleDetail } from '@/commons/api';
+
+interface infoInterface {
+  tag: string,
+  title: string,
+  created_at: string,
+  render: string,
+  tag_name: string[],
+}
+
+const info: infoInterface = reactive({
+  tag: '',
+  title: '',
+  created_at: '',
+  render: '',
+  tag_name: [],
+});
+const route = useRoute();
+
+function articleHandle() {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中',
+  });
+  getArticleDetail({
+    id: route.query.id,
+  }).then((res) => {
+    console.log(res);
+    loading.close();
+    if (res.data.reCode === 200) {
+      Object.assign(info, res.data.result.detail);
     }
-  },
-  components: {
-    mavonEditor
-  },
-  created () {
-    this.article()
-  },
-  methods: {
-    tagUrl (index) {
-      let tagArr = this.info.tag.split(',')
-      return '/ArchivesSingle/' + tagArr[index] + '?to=tag'
-    },
-    /** 字符串转数组 */
-    strToArr (str) {
-      console.log(str)
-      return str.split(',')
-    },
-    /** 文章详情 */
-    article () {
-      const loading = this.$loading({
-        lock: true,
-        text: '加载中'
-      })
-      this.$http.get('v1/front/article', {
-        params: {
-          id: this.$route.params.id
-        }
-      }).then((res) => {
-        console.log(res)
-        loading.close()
-        if (res.data.reCode === 200) {
-          this.info = res.data.result.detail
-        }
-      }).catch(() => {
-        loading.close()
-      })
-    }
-  }
+  }).catch(() => {
+    loading.close();
+  });
+}
+articleHandle();
+
+function tagUrl(index: number) {
+  const tagArr = info.tag.split(',');
+  return `/ArchivesSingle/${tagArr[index]}?to=tag`;
 }
 </script>
 

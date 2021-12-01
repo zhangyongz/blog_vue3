@@ -4,94 +4,107 @@
       <article class="item" v-for="(item, index) in articleList" :key="index">
         <div class="text">
           <h2 class="name">
-            <router-link :to="'/ArticleDetail/' + item.id">{{item.title}}</router-link>
+            <router-link :to="'/ArticleDetail?id=' + item.id">{{ item.title }}</router-link>
           </h2>
           <div class="post_meta">
             <div class="post_item">
               <i class="iconfont icon-calendar"></i>
-              <span class="post_text">发表于 {{item.created_at}}</span>
+              <span class="post_text">发表于 {{ item.created_at }}</span>
             </div>
             <div class="post_item">
               <i class="iconfont icon-category-belong"></i>
-              <span class="post_text">分类于
-                <router-link :to="'/ArchivesSingle/' + item.category + '?to=category'"
-                  class="category">
-                  {{item.category_name}}
-                </router-link>
+              <span class="post_text">
+                分类于
+                <router-link
+                  :to="'/ArchivesSingle/' + item.category + '?to=category'"
+                  class="category"
+                >{{ item.category_name }}</router-link>
               </span>
             </div>
           </div>
-          <div class="post_des">
-            {{item.describle}}
-          </div>
+          <div class="post_des">{{ item.describle }}</div>
           <p class="post_btn" @click="goDetail(item.id)">阅读全文 »</p>
           <!-- <router-link :to="'/ArticleDetail/' + item.id" tag="p" class="post_btn">
             阅读全文 »
-          </router-link> -->
+          </router-link>-->
         </div>
         <div class="img">
-          <img :src="item.cover_img">
+          <img :src="item.cover_img" />
         </div>
       </article>
     </section>
 
-    <el-pagination layout="prev, pager, next" :page-count="totalPages"
-      @current-change="getArticleList" class="paination">
-    </el-pagination>
+    <el-pagination
+      layout="prev, pager, next"
+      :page-count="totalPages"
+      @current-change="getArticleListHandle"
+      class="paination"
+    ></el-pagination>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import {
+  ref, reactive,
+} from 'vue';
+import { ElLoading } from 'element-plus';
+import { getArticleList } from '@/commons/api';
 
-export default {
-  name: 'Index',
-  data() {
-    return {
-      articleList: [],
-      totalPages: 0,
-    };
-  },
-  created() {
-    this.getArticleList(1);
-  },
-  methods: {
-    goDetail(id) {
-      window.open(`${window.location.origin}#/ArticleDetail/${id}`);
-    },
-    /** 文章列表 */
-    getArticleList(page) {
-      const loading = this.$loading({
-        lock: true,
-        text: '加载中',
-      });
-      this.$api.getArticleList().then((res) => {
-        console.log(res);
-        loading.close();
-        if (res.data.reCode === 200) {
-          const data = res.data.result;
-          this.articleList = data.articleList.filter((item) => item.is_del !== 1);
-          const totalPages = data.count / data.pageSize;
-          this.totalPages = Math.ceil(totalPages);
-          this.goTopAction();
-        }
-      }).catch(() => {
-        loading.close();
-      });
-    },
-    goTopAction() {
-      this.timer = null;
-      this.timer = setTimeout(() => {
-        const oTop = document.body.scrollTop || document.documentElement.scrollTop;
-        if (oTop > 0) {
-          window.scrollTo(0, oTop - 50);
-          this.goTopAction();
-        } else {
-          clearTimeout(this.timer);
-        }
-      }, 10);
-    },
-  },
-};
+const timer = ref<number | undefined>(undefined);
+
+function goTopAction() {
+  timer.value = undefined;
+  timer.value = setTimeout(() => {
+    const oTop = document.body.scrollTop || document.documentElement.scrollTop;
+    if (oTop > 0) {
+      window.scrollTo(0, oTop - 50);
+      goTopAction();
+    } else {
+      clearTimeout(timer.value);
+    }
+  }, 10);
+}
+
+interface articleItem {
+  category: number,
+  category_name: string,
+  cover_img: string,
+  created_at: string,
+  describle: string,
+  id: number,
+  title: string,
+  is_del: null | number
+}
+
+const articleList: articleItem[] = reactive([]);
+const totalPages = ref(0);
+
+function getArticleListHandle(page: number) {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中',
+  });
+  getArticleList({
+    page,
+  }).then((res) => {
+    loading.close();
+    if (res.data.reCode === 200) {
+      const data = res.data.result;
+      articleList.length = 0;
+      articleList.push(...data.articleList.filter((item: articleItem) => item.is_del !== 1));
+      const total = data.count / data.pageSize;
+      totalPages.value = Math.ceil(total);
+      goTopAction();
+    }
+  }).catch(() => {
+    loading.close();
+  });
+}
+getArticleListHandle(1);
+
+function goDetail(id: number) {
+  window.open(`${window.location.origin}/ArticleDetail?id=${id}`);
+}
 </script>
 
 <style lang="less">

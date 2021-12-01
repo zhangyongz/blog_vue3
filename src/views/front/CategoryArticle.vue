@@ -1,39 +1,44 @@
 <template>
   <div class="category_article_box">
     <p class="name">categories</p>
-    <p class="count">目前共计{{categoryList.length}}个分类</p>
+    <p class="count">目前共计{{ categoryList.length }}个分类</p>
     <ul class="list">
-      <router-link :to="'/ArchivesSingle/' + item.id + '?to=category'" tag="li" v-for="(item, index) in categoryList" :key="index">
-        <a href="#">{{item.name}}</a>
-        <span class="number">({{item.count}})</span>
+      <router-link
+        :to="'/ArchivesSingle?id=' + item.id + '&to=category'"
+        custom
+        v-slot="{ navigate }"
+        v-for="(item, index) in categoryList"
+        :key="index"
+      >
+        <li @click="navigate">
+          <a href="#">{{ item.name }}</a>
+          <span class="number">({{ item.count }})</span>
+        </li>
       </router-link>
     </ul>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'CategoryArticle',
-  data () {
-    return {
-      categoryList: []
-    }
-  },
-  created () {
-    this.getCategoryList()
-  },
-  methods: {
-    /** 分类列表 */
-    getCategoryList () {
-      this.$http.get('v1/front/categoryList').then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.categoryList = res.data.result.categoryList
-        }
-      })
-    }
-  }
+<script setup lang="ts">
+import { reactive } from 'vue';
+import { getCategoryList } from '@/commons/api';
+
+interface categoryItem {
+  id: number,
+  name: string,
+  count: number
 }
+
+const categoryList: categoryItem[] = reactive([]);
+
+function getCategoryListHandle() {
+  getCategoryList().then((res) => {
+    if (res.data.reCode === 200) {
+      categoryList.push(...res.data.result.categoryList);
+    }
+  });
+}
+getCategoryListHandle();
 </script>
 
 <style lang="less">

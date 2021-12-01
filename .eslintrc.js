@@ -15,6 +15,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-param-reassign': 'off',
+    'camelcase': 'off',
     'import/no-mutable-exports': 'off',
     'import/prefer-default-export': 'off',
     '@typescript-eslint/no-explicit-any': 'off',

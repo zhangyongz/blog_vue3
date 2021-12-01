@@ -2,62 +2,67 @@
   <div class="archives_box">
     <div class="list">
       <!-- <span class="archive_move_on"></span>
-      <span class="archive_page_counter">嗯..! 目前共计 24 篇日志。 继续努力。</span> -->
+      <span class="archive_page_counter">嗯..! 目前共计 24 篇日志。 继续努力。</span>-->
       <div v-for="(item, index) in articleList" :key="index">
         <div class="collection_title">
-          <h2>{{item.time}}</h2>
+          <h2>{{ item.time }}</h2>
         </div>
-        <div class="article" v-for="(article, articleIndex) in item.children" :key="articleIndex" @click="goDetail(article.id)">
-          <span class="date">{{getMothAndDay(article.created_at)}}</span>
-          <h3>{{article.title}}</h3>
+        <div
+          class="article"
+          v-for="(article, articleIndex) in item.children"
+          :key="articleIndex"
+          @click="goDetail(article.id)"
+        >
+          <span class="date">{{ getMothAndDay(article.created_at) }}</span>
+          <h3>{{ article.title }}</h3>
         </div>
-        <!-- <router-link :to="'/ArticleDetail/' + article.id" class="article" v-for="(article, articleIndex) in item.children" :key="articleIndex">
-          <span class="date">{{getMothAndDay(article.created_at)}}</span>
-          <h3>{{article.title}}</h3>
-        </router-link> -->
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { INDEX_URL } from '@/assets/js/consts'
-export default {
-  name: 'Archives',
-  data () {
-    return {
-      articleList: []
+<script setup lang="ts">
+import { reactive } from 'vue';
+import { ElLoading } from 'element-plus';
+import { getArticleListByDate } from '@/commons/api';
+
+interface articleItem {
+  id: number,
+  created_at: string,
+  title: string
+}
+
+interface dateItem {
+  time: string,
+  children: articleItem[]
+}
+
+const articleList: dateItem[] = reactive([]);
+
+function getArticleByDate() {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载中',
+  });
+  getArticleListByDate().then((res) => {
+    console.log(res);
+    loading.close();
+    if (res.data.reCode === 200) {
+      Object.assign(articleList, res.data.result);
     }
-  },
-  created () {
-    this.getArticleByDate()
-  },
-  methods: {
-    goDetail (id) {
-      window.open(INDEX_URL + '#/ArticleDetail/' + id)
-    },
-    /** 文章列表时间分组 */
-    getArticleByDate () {
-      const loading = this.$loading({
-        lock: true,
-        text: '加载中'
-      })
-      this.$http.get('v1/front/articleListByDate').then((res) => {
-        console.log(res)
-        loading.close()
-        if (res.data.reCode === 200) {
-          this.articleList = res.data.result
-        }
-      }).catch(() => {
-        loading.close()
-      })
-    },
-    /** 发布时间转年月 */
-    getMothAndDay (date) {
-      let mothAndDate = date.split('-')[1] + '-' + date.split('-')[2]
-      return mothAndDate
-    }
-  }
+  }).catch(() => {
+    loading.close();
+  });
+}
+getArticleByDate();
+
+function getMothAndDay(date: string) {
+  const mothAndDate = `${date.split('-')[1]}-${date.split('-')[2]}`;
+  return mothAndDate;
+}
+
+function goDetail(id: number) {
+  window.open(`${window.location.origin}/ArticleDetail?id=${id}`);
 }
 </script>
 

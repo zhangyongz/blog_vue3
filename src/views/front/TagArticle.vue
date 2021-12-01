@@ -1,39 +1,45 @@
 <template>
   <div class="tag_article_box">
     <p class="name">tags</p>
-    <p class="count">目前共计{{tagList.length}}个标签</p>
+    <p class="count">目前共计{{ tagList.length }}个标签</p>
     <ul class="list">
-      <router-link :to="'/ArchivesSingle/' + item.id + '?to=tag'" tag="li" v-for="(item, index) in tagList" :key="index">
-        <a href="#">{{item.name}}</a>
-        <span class="number">({{item.count}})</span>
+      <router-link
+        :to="'/ArchivesSingle?id=' + item.id + '&to=tag'"
+        custom
+        v-slot="{ navigate }"
+        v-for="(item, index) in tagList"
+        :key="index"
+      >
+        <li @click="navigate">
+          <a href="#">{{ item.name }}</a>
+          <span class="number">({{ item.count }})</span>
+        </li>
       </router-link>
     </ul>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'TagArticle',
-  data () {
-    return {
-      tagList: []
-    }
-  },
-  created () {
-    this.getTagList()
-  },
-  methods: {
-    /** 标签列表 */
-    getTagList () {
-      this.$http.get('v1/front/tagList').then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.tagList = res.data.result.tagList
-        }
-      })
-    }
-  }
+<script setup lang="ts">
+import { reactive } from 'vue';
+import { getTagList } from '@/commons/api';
+
+interface tagItem {
+  id: number,
+  name: string,
+  count: number
 }
+
+const tagList: tagItem[] = reactive([]);
+
+function getTagListHandle() {
+  getTagList().then((res) => {
+    console.log(res);
+    if (res.data.reCode === 200) {
+      tagList.push(...res.data.result.tagList);
+    }
+  });
+}
+getTagListHandle();
 </script>
 
 <style lang="less">
