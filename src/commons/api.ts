@@ -7,7 +7,8 @@ export function getCount(): Promise<AxiosResponse> {
 }
 
 interface getArticleListParams {
-  page: number
+  page: number,
+  pageSize?: number
 }
 
 export function getArticleList(params: getArticleListParams): Promise<AxiosResponse> {
@@ -56,4 +57,25 @@ export function getArticleListByDate(): Promise<AxiosResponse> {
 
 export function getTagList(): Promise<AxiosResponse> {
   return http.get('/v1/front/tagList');
+}
+
+interface loginInParams {
+  username: string,
+  password: string
+}
+
+export function login(data: loginInParams): Promise<AxiosResponse> {
+  return http.post('/v1/admin/login', data);
+}
+
+interface deleArticleParams {
+  id: number
+}
+
+export function deleArticle(data: deleArticleParams): Promise<AxiosResponse> {
+  return http.post('/v1/admin/deleArticle', data);
+}
+
+export function uploadImg(data: FormData): Promise<AxiosResponse> {
+  return http.post('/v1/admin/uploadImg', data);
 }
