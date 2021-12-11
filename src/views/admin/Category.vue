@@ -2,7 +2,7 @@
   <div class="category_box">
     <div class="add_group">
       <el-input v-model="name"></el-input>
-      <el-button @click="addCategory">添加</el-button>
+      <el-button @click="addCategoryHandle">添加</el-button>
     </div>
     <el-table :data="tableData" border style="width: 100%;" :height="tableHeight">
       <el-table-column prop="id" label="id" width="100">
@@ -10,109 +10,100 @@
       <el-table-column prop="name" label="名称">
       </el-table-column>
       <el-table-column label="操作" width="200">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button size="mini" @click="editCategoryConfirm(scope.row.id)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="deleCategory(scope.row.id)">删除</el-button>
+          <el-button size="mini" type="danger" @click="deleCategoryHandle(scope.row.id)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Category',
-  methods: {
-    handleEdit (index, row) {
-      console.log(index)
-      console.log(row)
-    },
-    handleDelete (index, row) {
-      console.log(index)
-      console.log(row)
-    },
-    /** 添加分类 */
-    addCategory () {
-      this.$http.post('v1/admin/addCategory', {
-        name: this.name
-      }).then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.$message({
-            message: '添加成功',
-            type: 'success'
-          })
-          this.categoryList()
-        }
-      })
-    },
-    /** 分类列表 */
-    categoryList () {
-      this.$http.get('v1/front/categoryList').then((res) => {
-        if (res.data.reCode === 200) {
-          this.tableData = res.data.result.categoryList
-        }
-      })
-    },
-    /** 删除分类 */
-    deleCategory (id) {
-      this.$http.post('v1/admin/deleteCategory', {
-        id: id
-      }).then((res) => {
-        console.log(res)
-        this.$message({
-          message: '删除成功',
-          type: 'success'
-        })
-        this.categoryList()
-      })
-    },
-    /** 编辑分类弹窗 */
-    editCategoryConfirm (id) {
-      this.$prompt('请输入分类名称', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消'
-      }).then(({ value }) => {
-        this.editCategory(id, value)
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '取消输入'
-        })
-      })
-    },
-    /** 编辑分类 */
-    editCategory (id, name) {
-      this.$http.post('v1/admin/editCategory', {
-        id: id,
-        name: name
-      }).then((res) => {
-        console.log(res)
-        if (res.data.reCode === 200) {
-          this.$message({
-            message: '编辑成功',
-            type: 'success'
-          })
-          this.categoryList()
-        }
-      })
+<script setup lang="ts">
+import { reactive, ref } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  getCategoryList, addCategory, editCategory, deleCategory,
+} from '@/commons/api';
+
+interface categoryItem {
+  id: number,
+  name: string,
+  count: number
+}
+
+const name = ref('');
+const tableHeight = document.documentElement.clientHeight - 160;
+const tableData: categoryItem[] = reactive([]);
+
+function getCategoryListHandle() {
+  getCategoryList().then((res) => {
+    if (res.data.reCode === 200) {
+      tableData.length = 0;
+      tableData.push(...res.data.result.categoryList);
     }
-  },
-  computed: {
-    tableHeight () {
-      let clientHeight = document.documentElement.clientHeight
-      return clientHeight - 160
+  });
+}
+getCategoryListHandle();
+
+function addCategoryHandle() {
+  addCategory({
+    name: name.value,
+  }).then((res) => {
+    console.log(res);
+    if (res.data.reCode === 200) {
+      ElMessage({
+        message: '添加成功',
+        type: 'success',
+      });
+      getCategoryListHandle();
     }
-  },
-  data () {
-    return {
-      tableData: [],
-      name: ''
+  });
+}
+
+function editCategoryHandle(id, name) {
+  editCategory({
+    id,
+    name,
+  }).then((res) => {
+    console.log(res);
+    if (res.data.reCode === 200) {
+      ElMessage({
+        message: '编辑成功',
+        type: 'success',
+      });
+      getCategoryListHandle();
     }
-  },
-  created () {
-    this.categoryList()
-  }
+  });
+}
+
+function editCategoryConfirm(id: number) {
+  ElMessageBox.prompt('请输入分类名称', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+  }).then(({ value }) => {
+    editCategoryHandle(id, value);
+  }).catch(() => {
+    ElMessage({
+      type: 'info',
+      message: '取消输入',
+    });
+  });
+}
+
+function deleCategoryHandle(id) {
+  deleCategory({
+    id,
+  }).then((res) => {
+    console.log(res);
+    ElMessage({
+      message: '删除成功',
+      type: 'success',
+    });
+    getCategoryListHandle();
+  });
 }
 </script>
 

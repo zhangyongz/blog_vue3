@@ -19,7 +19,7 @@
         style="height: 100%"
         ref="md"
         @imgAdd="imgAdd"
-        @save="save"
+        @save="saveHandle"
         :value="value"
       ></mavon-editor>
     </div>
@@ -32,7 +32,7 @@
       :on-success="handleAvatarSuccess"
     >
       <img v-if="coverImg" :src="coverImg" class="avatar" />
-      <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+      <el-icon v-else :size="30"><plus /></el-icon>
     </el-upload>
 
     <div class="tag_selector">
@@ -46,22 +46,23 @@
       </el-select>
     </div>
 
-    <el-input class="des_input" v-model="describle" type="textarea" autosize placeholder="请输入文章描述"></el-input>
+    <el-input class="des_input" v-model="describle" type="textarea"
+     autosize placeholder="请输入文章描述"></el-input>
 
-    <el-button @click="updateArticle" type="primary" v-if="id">更新</el-button>
-    <el-button @click="uploadArticle" type="primary" v-if="!id">完成</el-button>
+    <el-button @click="submitHandle" type="primary">{{ id ? '更新' : '完成' }}</el-button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { mavonEditor } from 'mavon-editor';
-import 'mavon-editor/dist/css/index.css';
 import { reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import { Plus } from '@element-plus/icons-vue';
 import {
-  getCategoryList, getTagList, getArticleDetail, uploadImg,
+  getCategoryList, getTagList, getArticleDetail, uploadImg, uploadArticle, updateArticle,
 } from '@/commons/api';
 import { BASE_URL } from '@/commons/consts';
+import store from '@/store';
 
 interface optionItem {
   value: number,
@@ -142,14 +143,55 @@ function handleAvatarSuccess(res) {
   coverImg.value = `${BASE_URL}/${res.result.path}`;
 }
 
-const md = ref<HTMLElement | null>(null);
+const uploadUrl = `${BASE_URL}/v1/admin/uploadImg`;
+const header = {
+  token: store.state.token,
+};
+
+interface mdElement {
+  $img2Url: any
+}
+
+const md = ref<mdElement | null>(null);
 function imgAdd(pos, $file) {
   const formdata = new FormData();
   formdata.append('file', $file);
   uploadImg(formdata).then((res) => {
     console.log(res);
-    // (md.value as HTMLElement).$img2Url(pos, `${BASE_URL}/${res.data.result.path}`);
+    // eslint-disable-next-line no-unused-expressions
+    md.value?.$img2Url(pos, `${BASE_URL}/${res.data.result.path}`);
   });
+}
+
+const router = useRouter();
+
+function submitHandle() {
+  let reqMethod = updateArticle;
+  if (id) {
+    reqMethod = uploadArticle;
+  }
+  reqMethod({
+    title: title.value,
+    value: value.value,
+    render: render.value,
+    category: category.value,
+    tag,
+    describle: describle.value,
+    cover_img: coverImg.value,
+  }).then((res) => {
+    if (res.data.reCode === 200) {
+      ElMessage({
+        message: id ? '更新成功' : '上传成功',
+        type: 'success',
+      });
+      router.replace('/Admin');
+    }
+  });
+}
+
+function saveHandle(v: string, r: string) {
+  value.value = v;
+  render.value = r;
 }
 </script>
 

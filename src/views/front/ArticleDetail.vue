@@ -16,13 +16,11 @@
     <!-- dark -->
     <!-- default -->
     <!-- github-gist -->
-    <!-- <mavon-editor codeStyle="github-gist" style="display: none"></mavon-editor> -->
+    <mavon-editor codeStyle="github-gist" style="display: none"></mavon-editor>
   </div>
 </template>
 
 <script setup lang="ts">
-// import mavonEditor from 'mavon-editor';
-// import 'mavon-editor/dist/css/index.css';
 import { reactive } from 'vue';
 import { ElLoading } from 'element-plus';
 import { useRoute } from 'vue-router';

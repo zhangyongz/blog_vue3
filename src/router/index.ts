@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import store from '@/store';
 
 // front
 import Public from '@/views/front/Public.vue';
@@ -99,6 +100,20 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((r) => r.meta.requiresAuth)) {
+    if (store.state.token) {
+      next();
+    } else {
+      next({
+        path: '/Login',
+      });
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;
