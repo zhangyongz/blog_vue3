@@ -20,7 +20,7 @@
         ref="md"
         @imgAdd="imgAdd"
         @save="saveHandle"
-        :value="value"
+        v-model="value"
       ></mavon-editor>
     </div>
 
@@ -112,7 +112,7 @@ const value = ref('');
 const render = ref('');
 const describle = ref('');
 const coverImg = ref('');
-const tag: number[] = reactive([]);
+const tag = ref<number[]>([]);
 
 function getArticleDetailHandle() {
   getArticleDetail({
@@ -127,10 +127,10 @@ function getArticleDetailHandle() {
       describle.value = data.describle;
       coverImg.value = data.cover_img;
       const tagList = data.tag.split(',');
-      for (let i = 0; i < tag.length; i++) {
+      for (let i = 0; i < tagList.length; i++) {
         tagList[i] = parseInt(tagList[i]);
       }
-      tag.push(...tagList);
+      tag.value.push(...tagList);
     }
   });
 }
@@ -166,16 +166,18 @@ function imgAdd(pos, $file) {
 const router = useRouter();
 
 function submitHandle() {
-  let reqMethod = updateArticle;
+  let reqMethod = uploadArticle;
+  console.log(id);
   if (id) {
-    reqMethod = uploadArticle;
+    reqMethod = updateArticle;
   }
   reqMethod({
+    id,
     title: title.value,
     value: value.value,
     render: render.value,
     category: category.value,
-    tag,
+    tag: tag.value,
     describle: describle.value,
     cover_img: coverImg.value,
   }).then((res) => {

@@ -64,7 +64,7 @@ articleHandle();
 
 function tagUrl(index: number) {
   const tagArr = info.tag.split(',');
-  return `/ArchivesSingle/${tagArr[index]}?to=tag`;
+  return `/ArchivesSingle?id=${tagArr[index]}&to=tag`;
 }
 </script>
 

@@ -16,7 +16,7 @@
               <span class="post_text">
                 分类于
                 <router-link
-                  :to="'/ArchivesSingle/' + item.category + '?to=category'"
+                  :to="'/ArchivesSingle?id=' + item.category + '&to=category'"
                   class="category"
                 >{{ item.category_name }}</router-link>
               </span>

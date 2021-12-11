@@ -73,7 +73,7 @@ interface deleArticleParams {
 }
 
 export function deleArticle(data: deleArticleParams): Promise<AxiosResponse> {
-  return http.post('/v1/admin/deleArticle', data);
+  return http.post('/v1/admin/deleteArticle', data);
 }
 
 export function uploadImg(data: FormData): Promise<AxiosResponse> {
@@ -96,7 +96,7 @@ export function uploadArticle(data: uploadArticleParams): Promise<AxiosResponse>
 }
 
 export function updateArticle(data: uploadArticleParams): Promise<AxiosResponse> {
-  return http.post('/v1/admin/uploadArticle', data);
+  return http.post('/v1/admin/updateArticle', data);
 }
 
 interface addCategoryParams {
