@@ -17,7 +17,7 @@ import Category from '@/views/admin/Category.vue';
 import Tag from '@/views/admin/Tag.vue';
 import Article from '@/views/admin/Article.vue';
 import AddArticle from '@/views/admin/AddArticle.vue';
-// import log from '../assets/js/log';
+import log from '../commons/log';
 
 const routes: Array<RouteRecordRaw> = [
   // 前台
@@ -114,6 +114,12 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+});
+
+router.afterEach((to) => {
+  log.track('viewPage', {
+    path: to.path,
+  });
 });
 
 export default router;

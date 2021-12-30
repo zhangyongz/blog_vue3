@@ -13,6 +13,8 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "allowJs": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "outDir": "./",
     "types": [
       "webpack-env"
     ],
