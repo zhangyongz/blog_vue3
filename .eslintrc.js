@@ -27,6 +27,7 @@ module.exports = {
     'no-plusplus': 'off',
     'no-shadow': 'off',
     'radix': 'off',
+    'linebreak-style': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/ban-ts-comment': 'off'
   //   "import/extensions": [
