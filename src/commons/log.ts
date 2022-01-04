@@ -1,4 +1,5 @@
-import Log from './log.es5';
+import Log from './log/log.es5';
+import { LogClass } from './log/types/types/index.d';
 
 let token: string | null = localStorage.getItem('logToken');
 if (!token) {
@@ -6,14 +7,6 @@ if (!token) {
 }
 localStorage.setItem('logToken', token);
 
-interface logConfig {
-  path?: string
-}
+const log = new Log(token);
 
-interface logInterface {
-  track: (s: string, o: logConfig) => void
-}
-
-const log: unknown = new Log(token);
-
-export default log as logInterface;
+export default log as LogClass;

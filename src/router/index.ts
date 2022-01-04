@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import store from '@/store';
+import { responseObj } from '../commons/log/types/types/index.d';
 
 // front
 import Public from '@/views/front/Public.vue';
@@ -116,10 +117,18 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+function callBack(res: string): void
+function callBack(res: responseObj): void
+function callBack(res: string | responseObj): void {
+  if (typeof res !== 'string') {
+    console.log('error');
+  }
+}
+
 router.afterEach((to) => {
   log.track('viewPage', {
     path: to.path,
-  });
+  }, callBack);
 });
 
 export default router;
