@@ -7,6 +7,6 @@ if (!token) {
 }
 localStorage.setItem('logToken', token);
 
-const log = new Log(token);
+const log: unknown = new Log(token, true);
 
 export default log as LogClass;

@@ -1,4 +1,3 @@
-/* eslint-disable */
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -85,9 +84,12 @@ function buildURL(url, params) {
 
 var Log = /*#__PURE__*/function () {
   function Log(token) {
+    var img = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
     _classCallCheck(this, Log);
 
     this.token = token;
+    this.img = img;
   }
 
   _createClass(Log, [{
@@ -103,37 +105,44 @@ var Log = /*#__PURE__*/function () {
   }, {
     key: "request",
     value: function request(url, callback) {
-      try {
-        var req = new XMLHttpRequest();
-        req.open('GET', url, true); // send the mp_optout cookie
-        // withCredentials cannot be modified until after calling .open on Android and Mobile Safari
+      if (this.img) {
+        var img = document.createElement('img');
+        img.src = url;
+        document.body.appendChild(img);
+        return;
+      } else {
+        try {
+          var req = new XMLHttpRequest();
+          req.open('GET', url, true); // send the mp_optout cookie
+          // withCredentials cannot be modified until after calling .open on Android and Mobile Safari
 
-        req.withCredentials = true;
+          req.withCredentials = true;
 
-        req.onreadystatechange = function () {
-          if (req.readyState === 4) {
-            // XMLHttpRequest.DONE == 4, except in safari 4
-            if (req.status === 200) {
-              if (callback) {
-                callback(req.responseText);
-              }
-            } else {
-              var error = 'Bad HTTP status: ' + req.status + ' ' + req.statusText;
-              console.error(error);
+          req.onreadystatechange = function () {
+            if (req.readyState === 4) {
+              // XMLHttpRequest.DONE == 4, except in safari 4
+              if (req.status === 200) {
+                if (callback) {
+                  callback(req.responseText);
+                }
+              } else {
+                var error = 'Bad HTTP status: ' + req.status + ' ' + req.statusText;
+                console.error(error);
 
-              if (callback) {
-                callback({
-                  status: req.status,
-                  error: error
-                });
+                if (callback) {
+                  callback({
+                    status: req.status,
+                    error: error
+                  });
+                }
               }
             }
-          }
-        };
+          };
 
-        req.send(null); // 发送异步请求
-      } catch (e) {
-        console.error(e);
+          req.send(null); // 发送异步请求
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
   }]);
