@@ -1,5 +1,4 @@
-import Log from './log/log.es5';
-import { LogClass } from './log/types/types/index.d';
+import Log from 'log-sdk-javascript';
 
 let token: string | null = localStorage.getItem('logToken');
 if (!token) {
@@ -7,6 +6,6 @@ if (!token) {
 }
 localStorage.setItem('logToken', token);
 
-const log: unknown = new Log(token, true);
+const log = new Log(token, true);
 
-export default log as LogClass;
+export default log;
